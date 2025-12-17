@@ -1,0 +1,2 @@
+# The-Difference-Between-Share-of-Votes-in-U.S-Presidential-Elections-1976-2020-
+This is a data analysis project exploring political polarization in U.S. Presidential Elections from 1976 to 2016. It investigates whether state-level elections have become less competitive over time by analyzing the widening margin of victory between Democratic and Republican candidates, confirming a trend of increasing political division.
