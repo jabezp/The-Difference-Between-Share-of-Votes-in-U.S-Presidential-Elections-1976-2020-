@@ -1,0 +1,75 @@
+---
+title: "US Presidential Election Polarization (1976-2016)"
+author: "Jabez Pagulayan"
+date: 12/16/2025
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(readr)
+
+# Load the dataset
+election_data <- read_csv("1976-2016-president.csv")
+```
+
+```{r}
+# Step 1: Filter for only Democrat and Republican parties
+major_parties <- election_data %>%
+  filter(party %in% c("democrat", "republican"))
+
+# Step 2: Calculate vote share (candidate votes / total votes)
+major_parties <- major_parties %>%
+  mutate(vote_share = candidatevotes / totalvotes)
+
+# Step 3: Calculate the margin of victory/loss for each state and year
+# I am grouping by year and state, then taking the absolute difference between the two top candidates
+state_margins <- major_parties %>%
+  group_by(year, state) %>%
+  summarize(margin = abs(diff(vote_share)), .groups = 'drop')
+
+# Check the first few rows to make sure it worked
+head(state_margins)
+```
+
+Visualization 1:
+
+Distribution of Margins Over Time This boxplot shows the spread of vote differences in states for each election year. If the boxes move up, it means the difference between parties is getting bigger (more polarized).
+
+```{r}
+# Figure 1
+ggplot(state_margins, aes(x = factor(year), y = margin)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(title = "Figure 1: Distribution of Vote Share Differences by Year",
+       x = "Election Year",
+       y = "Vote Share Margin (Difference between Dem and Rep)") +
+  theme_minimal()
+```
+
+Visualization 2: Average Margin Trend This line graph shows the average difference between the two parties across all states. A rising line confirms my hypothesis that states are becoming more divided.
+
+```{r}
+# Calculate the average margin for each year
+avg_margin_by_year <- state_margins %>%
+  group_by(year) %>%
+  summarize(mean_margin = mean(margin))
+
+# Figure 2
+ggplot(avg_margin_by_year, aes(x = year, y = mean_margin)) +
+  geom_line(color = "blue", size = 1) +
+  geom_point(color = "red") +
+  labs(title = "Figure 2: Average State Vote Margin Over Time",
+       x = "Election Year",
+       y = "Average Vote Margin") +
+  theme_minimal()
+```
+```{r}
+model <- lm(margin ~ year, data = state_margins)
+summary(model)
+```
+
